@@ -37,7 +37,6 @@ const handlePost = (request, response, parsedUrl) => {
     }
 };
 
-// Handle GET requests
 const handleGet = (request, response, parsedUrl) => {
     console.log(`Received GET request for: ${parsedUrl.pathname}`);
 
@@ -52,6 +51,9 @@ const handleGet = (request, response, parsedUrl) => {
     } else if (parsedUrl.pathname === '/getTrackById') {
         console.log(`Fetching track with ID: ${queryParams.id}`);
         jsonHandler.getTrackById(request, response, queryParams);
+    } else if (parsedUrl.pathname === '/getArtists') {  // NEW ENDPOINT
+        console.log('Serving artist data');
+        jsonHandler.getArtists(request, response, queryParams);
     } else {
         response.writeHead(404, { 'Content-Type': 'application/json' });
         response.end(JSON.stringify({ message: 'Endpoint not found' }));

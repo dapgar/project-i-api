@@ -50,7 +50,55 @@ const getTracks = (request, response, queryParams) => {
     respondJSON(request, response, 200, { tracks: simplifiedTracks });
 };
 
+const getArtists = (request, response, queryParams) => {
+    // Group tracks by artist
+    const artistData = {};
+
+    musicData.forEach(track => {
+        const artist = track.artist;
+        const danceability = parseFloat(track.danceability);
+
+        if (!artistData[artist]) {
+            artistData[artist] = { songCount: 0, totalDanceability: 0 };
+        }
+
+        artistData[artist].songCount += 1;
+        artistData[artist].totalDanceability += danceability;
+    });
+
+    // Convert to array with calculated average danceability
+    let artistsArray = Object.keys(artistData).map(artist => ({
+        name: artist,
+        songCount: artistData[artist].songCount,
+        avgDanceability: artistData[artist].totalDanceability / artistData[artist].songCount
+    }));
+
+    // Filter by artist name (case-insensitive substring match)
+    if (queryParams.name) {
+        const nameQuery = queryParams.name.toLowerCase();
+        artistsArray = artistsArray.filter(artist => artist.name.toLowerCase().includes(nameQuery));
+    }
+
+    // Filter by minimum song count
+    if (queryParams.songCountMin) {
+        const minSongs = parseInt(queryParams.songCountMin, 10);
+        if (!isNaN(minSongs)) {
+            artistsArray = artistsArray.filter(artist => artist.songCount >= minSongs);
+        }
+    }
+
+    // Filter by minimum average danceability
+    if (queryParams.danceMin) {
+        const minDance = parseFloat(queryParams.danceMin);
+        if (!isNaN(minDance)) {
+            artistsArray = artistsArray.filter(artist => artist.avgDanceability >= minDance);
+        }
+    }
+
+    respondJSON(request, response, 200, { artists: artistsArray });
+};
 
 module.exports = {
     getTracks,
+    getArtists, // Make sure this is exported
 };
