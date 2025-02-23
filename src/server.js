@@ -66,6 +66,12 @@ const handleGet = (request, response, parsedUrl) => {
     else if (parsedUrl.pathname === '/getFavorites') {
         jsonHandler.getFavorites(request, response); // getFavorites
     }
+    else if (parsedUrl.pathname === '/addFavorite') {
+        jsonHandler.addFavorite(request, response, ); // addFavorite
+    }
+    else if (parsedUrl.pathname === '/addTrack') {
+        jsonHandler.addTrack(request, response); // addTrack
+    }
     else {
         response.writeHead(404, { 'Content-Type': 'application/json' });
         response.end(JSON.stringify({ message: 'Endpoint not found' }));
