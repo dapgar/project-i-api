@@ -2,141 +2,123 @@
 <html lang="en">
 
 <head>
-    <title>Music Track Viewer</title>
+    <title>Music Track API</title>
     <link rel="stylesheet" type="text/css" href="/style.css">
-
-    <script>
-        const handleResponse = async (response, type) => {
-            const content = document.querySelector('#content');
-            content.innerHTML = ''; // Clear previous content
-
-            switch (response.status) {
-                case 200:
-                    break; // Proceed to display data
-                case 204:
-                    content.innerHTML = `<b>No ${type} Found</b>`;
-                    return;
-                case 400:
-                    content.innerHTML = '<b>Bad Request</b>';
-                    return;
-                case 404:
-                    content.innerHTML = '<b>Not Found</b>';
-                    return;
-                default:
-                    content.innerHTML = `<b>Unexpected Error: ${response.status}</b>`;
-                    return;
-            }
-
-            try {
-                const data = await response.json();
-                console.log(`Received ${type} Data:`, data);
-
-                if (type === 'tracks' && data.tracks && data.tracks.length > 0) {
-                    const trackList = document.createElement('div');
-                    trackList.className = 'track-list';
-
-                    data.tracks.forEach(track => {
-                        const trackCard = document.createElement('div');
-                        trackCard.className = 'track-card';
-
-                        trackCard.innerHTML = `
-                        <img src="${track.img}" alt="${track.name}" class="track-image">
-                        <h3>${track.name}</h3>
-                        <p><b>Artist:</b> ${track.artist}</p>
-                        <p><b>Danceability:</b> ${track.danceability}</p>
-                        `;
-
-                        trackList.appendChild(trackCard);
-                    });
-
-                    content.appendChild(trackList);
-                }
-                else if (type === 'artists' && data.artists && data.artists.length > 0) {
-                    const artistList = document.createElement('div');
-                    artistList.className = 'artist-list';
-
-                    data.artists.forEach(artist => {
-                        const artistCard = document.createElement('div');
-                        artistCard.className = 'artist-card';
-
-                        artistCard.innerHTML = `
-                            <h3>${artist.name}</h3>
-                            <p><b>Genre:</b> ${artist.genre}</p>
-                            <p><b>Top Track:</b> ${artist.topTrack}</p>
-                        `;
-
-                        artistList.appendChild(artistCard);
-                    });
-
-                    content.appendChild(artistList);
-                }
-                else {
-                    content.innerHTML = `<b>No ${type} available</b>`;
-                }
-            } catch (error) {
-                console.error(`Error parsing ${type} JSON:`, error);
-                content.innerHTML = `<b>Error loading ${type}</b>`;
-            }
-        };
-
-        const loadTracks = async () => {
-            console.log("Fetching track data...");
-
-            try {
-                const response = await fetch('/getTracks', { method: 'GET' });
-                await handleResponse(response, 'tracks');
-            } catch (error) {
-                console.error("Fetch error:", error);
-                document.querySelector('#content').innerHTML = '<b>Failed to load tracks</b>';
-            }
-        };
-
-        const loadArtists = async () => {
-            console.log("Fetching artist data...");
-
-            try {
-                const response = await fetch('/getArtists', { method: 'GET' });
-                await handleResponse(response, 'artists');
-            } catch (error) {
-                console.error("Fetch error:", error);
-                document.querySelector('#content').innerHTML = '<b>Failed to load artists</b>';
-            }
-        };
-
-        window.onload = () => {
-            document.querySelector('#loadTracksButton').addEventListener('click', loadTracks);
-            document.querySelector('#loadArtistsButton').addEventListener('click', loadArtists);
-        };
-    </script>
-
-    <style>
-        .track-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-        }
-
-        .track-card {
-            width: 200px;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            text-align: center;
-        }
-
-        .track-image {
-            width: 100%;
-            height: auto;
-            border-radius: 8px;
-        }
-    </style>
+    <script src="/client.min.js"></script>
 </head>
 
 <body>
-    <h2>Music Track Viewer</h2>
-    <button id="loadTracksButton">Load Tracks</button>
-    <button id="loadArtistsButton">Load Artists</button>
-    <section id="content"></section>
+    <div class="mainContent">
+        <a href="https://www.kaggle.com/datasets/jashanjeetsinghhh/songs-dataset">Dataset Link</a>
+        <h1>Music API</h1>
+
+        <h2>THIS SCREEN IS NOT FUNCTIONAL YET, GO TO ENDPOINTS DIRECTLY TO TEST RESULTS.</h2>
+
+        <div class="endpoint">
+            <h2 class="collapsible">/getAllTracks <span class="methods"><code>GET</code></span></h2>
+            <div class="content">
+                <div class="content-box">
+                    <h3>Test This Endpoint</h3>
+                    <form data-method="GET" data-endpoint="/getAllTracks">
+                        <button type="submit">Send Request</button>
+                    </form>
+                    <pre class="result"></pre>
+                </div>
+            </div>
+        </div>
+
+        <div class="endpoint">
+            <h2 class="collapsible">/getTracks <span class="methods"><code>GET</code></span></h2>
+            <div class="content">
+                <div class="content-box">
+                    <h3>Test This Endpoint</h3>
+                    <form data-method="GET" data-endpoint="/getTracks">
+                        <label>Title: <input type="text" name="title"></label><br>
+                        <label>Artist: <input type="text" name="artist"></label><br>
+                        <label>Danceability: <input type="text" name="danceability"></label><br>
+                        <button type="submit">Send Request</button>
+                    </form>
+                    <pre class="result"></pre>
+                </div>
+            </div>
+        </div>
+
+        <div class="endpoint">
+            <h2 class="collapsible">/getAllArtists <span class="methods"><code>GET</code></span></h2>
+            <div class="content">
+                <div class="content-box">
+                    <h3>Test This Endpoint</h3>
+                    <form data-method="GET" data-endpoint="/getAllArtists">
+                        <button type="submit">Send Request</button>
+                    </form>
+                    <pre class="result"></pre>
+                </div>
+            </div>
+        </div>
+
+        <div class="endpoint">
+            <h2 class="collapsible">/getArtists <span class="methods"><code>GET</code></span></h2>
+            <div class="content">
+                <div class="content-box">
+                    <h3>Test This Endpoint</h3>
+                    <form data-method="GET" data-endpoint="/getArtists">
+                        <label>Title: <input type="text" name="title"></label><br>
+                        <label>Artist: <input type="text" name="artist"></label><br>
+                        <label>Danceability: <input type="text" name="danceability"></label><br>
+                        <button type="submit">Send Request</button>
+                    </form>
+                    <pre class="result"></pre>
+                </div>
+            </div>
+        </div>
+
+        <div class="endpoint">
+            <h2 class="collapsible">/getFavorites <span class="methods"><code>GET</code></span></h2>
+            <div class="content">
+                <div class="content-box">
+                    <h3>Test This Endpoint</h3>
+                    <form data-method="POST" data-endpoint="/getFavorites">
+                        <button type="submit">Send Request</button>
+                    </form>
+                    <pre class="result"></pre>
+                </div>
+            </div>
+        </div>
+
+        <div class="endpoint">
+            <h2 class="collapsible">/addFavorite <span class="methods"><code>POST</code></span></h2>
+            <div class="content">
+                <div class="content-box">
+                    <h3>Test This Endpoint</h3>
+                    <form data-method="POST" data-endpoint="/addFavorite">
+                        <label>Title: <input type="text" name="title"></label><br>
+                        <button type="submit">Send Request</button>
+                    </form>
+                    <pre class="result"></pre>
+                </div>
+            </div>
+        </div>
+
+        <div class="endpoint">
+            <h2 class="collapsible">/addTrack <span class="methods"><code>POST</code></span></h2>
+            <div class="content">
+                <div class="content-box">
+                    <h3>Test This Endpoint</h3>
+                    <form data-method="POST" data-endpoint="/addTrack">
+                        <label>Title: <input type="text" name="title"></label><br>
+                        <label>Artist: <input type="text" name="artist"></label><br>
+                        <label>Danceability: <input type="text" name="danceability"></label><br>
+                        <button type="submit">Send Request</button>
+                    </form>
+                    <pre class="result"></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        Dominic Apgar - IGME.430 - API Project I
+    </footer>
 </body>
 
 </html>

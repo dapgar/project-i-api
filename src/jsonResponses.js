@@ -1,9 +1,8 @@
 const fs = require('fs');
 
-// Load JSON data
-const musicData = JSON.parse(fs.readFileSync(`${__dirname}/../data/music.json`, 'utf8'));
+const dataPath = `${__dirname}/../data/music.json`;
+let musicData = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
 
-// Function to respond with JSON
 const respondJSON = (request, response, status, object) => {
     const content = JSON.stringify(object);
     response.writeHead(status, { 'Content-Type': 'application/json' });
@@ -11,10 +10,16 @@ const respondJSON = (request, response, status, object) => {
     response.end();
 };
 
+// get all track names
+const getAllTracks = (request, response) => {
+    const trackNames = musicData.map(track => track.name);
+    respondJSON(request, response, 200, { tracks: trackNames });
+};
+
+// get all tracks w filtering
 const getTracks = (request, response, queryParams) => {
     let filteredTracks = musicData;
 
-    // Filter by name (case-insensitive substring match)
     if (queryParams.name) {
         const nameQuery = queryParams.name.toLowerCase();
         filteredTracks = filteredTracks.filter(track =>
@@ -22,7 +27,6 @@ const getTracks = (request, response, queryParams) => {
         );
     }
 
-    // Filter by artist (case-insensitive match)
     if (queryParams.artist) {
         const artistQuery = queryParams.artist.toLowerCase();
         filteredTracks = filteredTracks.filter(track =>
@@ -30,7 +34,6 @@ const getTracks = (request, response, queryParams) => {
         );
     }
 
-    // Filter by minimum danceability
     if (queryParams.danceability_min) {
         const minDanceability = parseFloat(queryParams.danceability_min);
         if (!isNaN(minDanceability)) {
@@ -40,18 +43,23 @@ const getTracks = (request, response, queryParams) => {
         }
     }
 
-    // **Trim down response to only return necessary fields**
     const simplifiedTracks = filteredTracks.map(track => ({
         name: track.name,
-        artist: track.artist, // Already stored as a string
-        danceability: parseFloat(track.danceability) // Convert to number
+        artist: track.artist,
+        danceability: parseFloat(track.danceability),
     }));
 
     respondJSON(request, response, 200, { tracks: simplifiedTracks });
 };
 
+// get all artist names
+const getAllArtists = (request, response) => {
+    const artistNames = musicData.map(track => track.artist);
+    respondJSON(request, response, 200, { tracks: artistNames });
+};
+
+// get artists w filtering
 const getArtists = (request, response, queryParams) => {
-    // Group tracks by artist
     const artistData = {};
 
     musicData.forEach(track => {
@@ -66,20 +74,17 @@ const getArtists = (request, response, queryParams) => {
         artistData[artist].totalDanceability += danceability;
     });
 
-    // Convert to array with calculated average danceability
     let artistsArray = Object.keys(artistData).map(artist => ({
         name: artist,
         songCount: artistData[artist].songCount,
-        avgDanceability: artistData[artist].totalDanceability / artistData[artist].songCount
+        avgDanceability: artistData[artist].totalDanceability / artistData[artist].songCount,
     }));
 
-    // Filter by artist name (case-insensitive substring match)
     if (queryParams.name) {
         const nameQuery = queryParams.name.toLowerCase();
         artistsArray = artistsArray.filter(artist => artist.name.toLowerCase().includes(nameQuery));
     }
 
-    // Filter by minimum song count
     if (queryParams.songCountMin) {
         const minSongs = parseInt(queryParams.songCountMin, 10);
         if (!isNaN(minSongs)) {
@@ -87,7 +92,6 @@ const getArtists = (request, response, queryParams) => {
         }
     }
 
-    // Filter by minimum average danceability
     if (queryParams.danceMin) {
         const minDance = parseFloat(queryParams.danceMin);
         if (!isNaN(minDance)) {
@@ -98,7 +102,82 @@ const getArtists = (request, response, queryParams) => {
     respondJSON(request, response, 200, { artists: artistsArray });
 };
 
+// add a new track
+const addTrack = (request, response) => {
+    const responseJSON = {
+        message: 'Name, artist, and danceability are required.',
+    };
+
+    const { name, artist, danceability } = request.body;
+
+    if (!name || !artist || danceability === undefined) {
+        responseJSON.id = 'missingParams';
+        return respondJSON(request, response, 400, responseJSON);
+    }
+
+    const newTrack = {
+        name,
+        artist,
+        danceability: parseFloat(danceability),
+    };
+
+    musicData.push(newTrack);
+
+    // save to JSON file
+    fs.writeFileSync(dataPath, JSON.stringify(musicData, null, 2), 'utf8');
+
+    responseJSON.message = 'Track added successfully!';
+    return respondJSON(request, response, 201, responseJSON);
+};
+
+// make sure favorites exist
+if (!musicData.favorites) {
+    musicData.favorites = [];
+}
+
+// get all favorites
+const getFavorites = (request, response) => {
+    respondJSON(request, response, 200, { favorites: musicData.favorites });
+};
+
+// add favorite track
+const addFavorite = (request, response) => {
+    const responseJSON = {
+        message: 'Track name is required.',
+    };
+
+    const { name } = request.body;
+
+    if (!name) {
+        responseJSON.id = 'missingParams';
+        return respondJSON(request, response, 400, responseJSON);
+    }
+
+    // check track exists
+    const trackExists = musicData.some(track => track.name === name);
+
+    if (!trackExists) {
+        responseJSON.message = 'Track not found in the dataset.';
+        responseJSON.id = 'notFound';
+        return respondJSON(request, response, 404, responseJSON);
+    }
+
+    // prevent dupes
+    if (!musicData.favorites.includes(name)) {
+        musicData.favorites.push(name);
+        fs.writeFileSync(dataPath, JSON.stringify(musicData, null, 2), 'utf8');
+    }
+
+    responseJSON.message = 'Track added to favorites!';
+    return respondJSON(request, response, 201, responseJSON);
+};
+
 module.exports = {
     getTracks,
-    getArtists, // Make sure this is exported
+    getArtists,
+    addTrack,
+    getAllTracks,
+    getAllArtists,
+    getFavorites,
+    addFavorite,
 };

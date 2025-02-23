@@ -5,7 +5,6 @@ const jsonHandler = require('./jsonResponses.js');
 
 const port = process.env.PORT || process.env.NODE_PORT || 3000;
 
-// Helper function to parse POST request body
 const parseBody = (request, response, handler) => {
     const body = [];
 
@@ -27,11 +26,15 @@ const parseBody = (request, response, handler) => {
     });
 };
 
-// Handle POST requests
+// handle POST requests
 const handlePost = (request, response, parsedUrl) => {
     if (parsedUrl.pathname === '/addUser') {
         parseBody(request, response, jsonHandler.addUser);
-    } else {
+    }
+    else if (parsedUrl.pathname === '/addFavorite') {
+        parseBody(request, response, jsonHandler.addFavorite); // addFavorite
+    }
+    else {
         response.writeHead(404, { 'Content-Type': 'application/json' });
         response.end(JSON.stringify({ message: 'Endpoint not found' }));
     }
@@ -40,27 +43,35 @@ const handlePost = (request, response, parsedUrl) => {
 const handleGet = (request, response, parsedUrl) => {
     console.log(`Received GET request for: ${parsedUrl.pathname}`);
 
-    // Extract query parameters
     const queryParams = Object.fromEntries(parsedUrl.searchParams);
 
-    if (parsedUrl.pathname === '/style.css') {
-        htmlHandler.getCSS(request, response);
-    } else if (parsedUrl.pathname === '/getTracks') {
-        console.log('Serving track data with filters:', queryParams);
-        jsonHandler.getTracks(request, response, queryParams); // Pass queryParams
-    } else if (parsedUrl.pathname === '/getTrackById') {
-        console.log(`Fetching track with ID: ${queryParams.id}`);
-        jsonHandler.getTrackById(request, response, queryParams);
-    } else if (parsedUrl.pathname === '/getArtists') {  // NEW ENDPOINT
-        console.log('Serving artist data');
-        jsonHandler.getArtists(request, response, queryParams);
-    } else {
+    if (parsedUrl.pathname === '/' || parsedUrl.pathname === '/client.html') {
+        htmlHandler.getIndex(request, response);
+    }
+    else if (parsedUrl.pathname === '/style.css') {
+        htmlHandler.getCSS(request, response); // style
+    }
+    else if (parsedUrl.pathname === '/getAllTracks') {
+        jsonHandler.getAllTracks(request, response); // getAllTracks
+    }
+    else if (parsedUrl.pathname === '/getTracks') {
+        jsonHandler.getTracks(request, response, queryParams); // getTracks
+    }
+    else if (parsedUrl.pathname === '/getAllArtists') {
+        jsonHandler.getAllArtists(request, response); // getAllArtists
+    }
+    else if (parsedUrl.pathname === '/getArtists') {
+        jsonHandler.getArtists(request, response, queryParams); // getArtists
+    }
+    else if (parsedUrl.pathname === '/getFavorites') {
+        jsonHandler.getFavorites(request, response); // getFavorites
+    }
+    else {
         response.writeHead(404, { 'Content-Type': 'application/json' });
         response.end(JSON.stringify({ message: 'Endpoint not found' }));
     }
 };
 
-// Main request handler
 const onRequest = (request, response) => {
     const protocol = request.connection.encrypted ? 'https' : 'http';
     const parsedUrl = new URL(request.url, `${protocol}://${request.headers.host}`);
@@ -75,7 +86,6 @@ const onRequest = (request, response) => {
     }
 };
 
-// Start server
 http.createServer(onRequest).listen(port, () => {
     console.log(`Listening on 127.0.0.1:${port}`);
 });
