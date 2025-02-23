@@ -41,16 +41,15 @@ const handlePost = (request, response, parsedUrl) => {
 const handleGet = (request, response, parsedUrl) => {
     console.log(`Received GET request for: ${parsedUrl.pathname}`);
 
+    // Extract query parameters
+    const queryParams = Object.fromEntries(parsedUrl.searchParams);
+
     if (parsedUrl.pathname === '/style.css') {
         htmlHandler.getCSS(request, response);
     } else if (parsedUrl.pathname === '/getTracks') {
-        console.log('Serving track data...');
-        jsonHandler.getTracks(request, response);
-    } else if (parsedUrl.pathname === '/getArtists') {
-        console.log('Serving artist data...');
-        jsonHandler.getArtists(request, response);
+        console.log('Serving track data with filters:', queryParams);
+        jsonHandler.getTracks(request, response, queryParams); // Pass queryParams
     } else if (parsedUrl.pathname === '/getTrackById') {
-        const queryParams = Object.fromEntries(parsedUrl.searchParams);
         console.log(`Fetching track with ID: ${queryParams.id}`);
         jsonHandler.getTrackById(request, response, queryParams);
     } else {

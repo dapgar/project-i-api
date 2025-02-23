@@ -11,26 +11,46 @@ const respondJSON = (request, response, status, object) => {
     response.end();
 };
 
-// Get all music tracks
-const getTracks = (request, response) => {
-    respondJSON(request, response, 200, { tracks: musicData });
-};
+const getTracks = (request, response, queryParams) => {
+    let filteredTracks = musicData;
 
-// Get track by ID
-const getTrackById = (request, response, queryParams) => {
-    if (!queryParams.id) {
-        return respondJSON(request, response, 400, { message: 'Missing track ID' });
+    // Filter by name (case-insensitive substring match)
+    if (queryParams.name) {
+        const nameQuery = queryParams.name.toLowerCase();
+        filteredTracks = filteredTracks.filter(track =>
+            track.name.toLowerCase().includes(nameQuery)
+        );
     }
 
-    const track = musicData.find((t) => t.spotify_id === queryParams.id);
-    if (!track) {
-        return respondJSON(request, response, 404, { message: 'Track not found' });
+    // Filter by artist (case-insensitive match)
+    if (queryParams.artist) {
+        const artistQuery = queryParams.artist.toLowerCase();
+        filteredTracks = filteredTracks.filter(track =>
+            track.artist.toLowerCase().includes(artistQuery)
+        );
     }
 
-    respondJSON(request, response, 200, { track });
+    // Filter by minimum danceability
+    if (queryParams.danceability_min) {
+        const minDanceability = parseFloat(queryParams.danceability_min);
+        if (!isNaN(minDanceability)) {
+            filteredTracks = filteredTracks.filter(track =>
+                parseFloat(track.danceability) >= minDanceability
+            );
+        }
+    }
+
+    // **Trim down response to only return necessary fields**
+    const simplifiedTracks = filteredTracks.map(track => ({
+        name: track.name,
+        artist: track.artist, // Already stored as a string
+        danceability: parseFloat(track.danceability) // Convert to number
+    }));
+
+    respondJSON(request, response, 200, { tracks: simplifiedTracks });
 };
+
 
 module.exports = {
     getTracks,
-    getTrackById,
 };
