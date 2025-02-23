@@ -104,31 +104,55 @@ const getArtists = (request, response, queryParams) => {
 
 // add a new track
 const addTrack = (request, response) => {
-    const responseJSON = {
+    let responseJSON = {
         message: 'Name, artist, and danceability are required.',
     };
 
-    const { name, artist, danceability } = request.body;
+    const { name, artist, danceability } = request.body || {};
 
     if (!name || !artist || danceability === undefined) {
         responseJSON.id = 'missingParams';
         return respondJSON(request, response, 400, responseJSON);
     }
 
+    const parsedDanceability = parseFloat(danceability);
+    if (isNaN(parsedDanceability)) {
+        responseJSON.message = 'Danceability must be a valid number.';
+        responseJSON.id = 'invalidDanceability';
+        return respondJSON(request, response, 400, responseJSON);
+    }
+
+    const trackExists = musicData.some(track =>
+        track.name.toLowerCase() === name.toLowerCase() &&
+        track.artist.toLowerCase() === artist.toLowerCase()
+    );
+
+    if (trackExists) {
+        responseJSON.message = 'Track already exists.';
+        responseJSON.id = 'duplicateTrack';
+        return respondJSON(request, response, 409, responseJSON);
+    }
+
     const newTrack = {
         name,
         artist,
-        danceability: parseFloat(danceability),
+        danceability: parsedDanceability,
     };
 
+    // adds new track
     musicData.push(newTrack);
 
-    // save to JSON file
-    fs.writeFileSync(dataPath, JSON.stringify(musicData, null, 2), 'utf8');
-
-    responseJSON.message = 'Track added successfully!';
-    return respondJSON(request, response, 201, responseJSON);
+    try {
+        fs.writeFileSync(dataPath, JSON.stringify(musicData, null, 2), 'utf8');
+        responseJSON.message = 'Track added successfully!';
+        return respondJSON(request, response, 201, responseJSON);
+    } catch (err) {
+        console.error('Error writing to file:', err);
+        responseJSON.message = 'Internal server error.';
+        return respondJSON(request, response, 500, responseJSON);
+    }
 };
+
 
 // make sure favorites exist
 if (!musicData.favorites) {
@@ -142,18 +166,17 @@ const getFavorites = (request, response) => {
 
 // add favorite track
 const addFavorite = (request, response) => {
+    const { name } = request.body || {};
+
     const responseJSON = {
         message: 'Track name is required.',
     };
-
-    const { name } = request.body;
 
     if (!name) {
         responseJSON.id = 'missingParams';
         return respondJSON(request, response, 400, responseJSON);
     }
 
-    // check track exists
     const trackExists = musicData.some(track => track.name === name);
 
     if (!trackExists) {
@@ -171,6 +194,7 @@ const addFavorite = (request, response) => {
     responseJSON.message = 'Track added to favorites!';
     return respondJSON(request, response, 201, responseJSON);
 };
+
 
 module.exports = {
     getTracks,

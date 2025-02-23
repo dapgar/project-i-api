@@ -32,13 +32,17 @@ const handlePost = (request, response, parsedUrl) => {
         parseBody(request, response, jsonHandler.addUser);
     }
     else if (parsedUrl.pathname === '/addFavorite') {
-        parseBody(request, response, jsonHandler.addFavorite); // addFavorite
+        parseBody(request, response, jsonHandler.addFavorite);
+    }
+    else if (parsedUrl.pathname === '/addTrack') {
+        parseBody(request, response, jsonHandler.addTrack);
     }
     else {
         response.writeHead(404, { 'Content-Type': 'application/json' });
         response.end(JSON.stringify({ message: 'Endpoint not found' }));
     }
 };
+
 
 const handleGet = (request, response, parsedUrl) => {
     console.log(`Received GET request for: ${parsedUrl.pathname}`);
@@ -67,7 +71,7 @@ const handleGet = (request, response, parsedUrl) => {
         jsonHandler.getFavorites(request, response); // getFavorites
     }
     else if (parsedUrl.pathname === '/addFavorite') {
-        jsonHandler.addFavorite(request, response, ); // addFavorite
+        jsonHandler.addFavorite(request, response,); // addFavorite
     }
     else if (parsedUrl.pathname === '/addTrack') {
         jsonHandler.addTrack(request, response); // addTrack
