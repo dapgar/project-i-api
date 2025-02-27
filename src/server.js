@@ -22,10 +22,10 @@ const parseBody = (request, response, handler) => {
         const bodyString = Buffer.concat(body).toString();
 
         try {
-            request.body = JSON.parse(bodyString); // Parse JSON correctly
+            request.body = JSON.parse(bodyString); 
         } catch (err) {
             console.error("JSON parsing error:", err);
-            request.body = {}; // Set to empty object on failure
+            request.body = {}; // set to empty object on failure
         }
 
         handler(request, response);
@@ -82,6 +82,7 @@ const handleGet = (request, response, parsedUrl) => {
     }
 };
 
+// handle HEAD requests
 const handleHead = (request, response, parsedUrl) => {
     console.log(`Received HEAD request for: ${parsedUrl.pathname}`);
 
@@ -109,6 +110,7 @@ const handleHead = (request, response, parsedUrl) => {
     }
 };
 
+// directs request to proper handler
 const onRequest = (request, response) => {
     const protocol = request.connection.encrypted ? 'https' : 'http';
     const parsedUrl = new URL(request.url, `${protocol}://${request.headers.host}`);

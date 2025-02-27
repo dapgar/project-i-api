@@ -3,6 +3,7 @@ const fs = require('fs');
 const dataPath = `${__dirname}/../data/music.json`;
 let musicData = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
 
+// responds with content based on method type
 const respondJSON = (request, response, status, object) => {
     const content = JSON.stringify(object);
     response.writeHead(status, {
@@ -52,6 +53,7 @@ const getTracks = (request, response, queryParams) => {
         }
     }
 
+    // formats the data in a neat, clean way
     const simplifiedTracks = filteredTracks.map(track => ({
         name: track.name,
         artist: track.artist,
@@ -124,6 +126,7 @@ const addTrack = (request, response) => {
 
     const { name, artist, danceability } = request.body || {};
 
+    // ensures all params are valid
     if (!name || !artist || danceability === undefined) {
         responseJSON.id = 'missingParams';
         return respondJSON(request, response, 400, responseJSON);
@@ -141,6 +144,7 @@ const addTrack = (request, response) => {
         track.artist.toLowerCase() === artist.toLowerCase()
     );
 
+    // checks for duplicate tracks 
     if (trackExists) {
         responseJSON.message = 'Track already exists.';
         responseJSON.id = 'duplicateTrack';
@@ -153,7 +157,7 @@ const addTrack = (request, response) => {
         danceability: parsedDanceability,
     };
 
-    // adds new track
+    // attempts to add new track
     musicData.push(newTrack);
 
     try {

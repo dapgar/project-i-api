@@ -7,7 +7,7 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", () => {
-            // Function to handle responses
+            // handles all responses
             const handleResponse = async (response, resultElement) => {
                 let resultText = `Status: ${response.status}\n`;
 
@@ -19,6 +19,7 @@
                         resultText += "No body content (possible HEAD request).";
                     }
                 }
+                // only attaches header info if HEAD method
                 else {
                     resultText += "\nHeaders:\n";
                     response.headers.forEach((value, name) => {
@@ -29,6 +30,7 @@
                 resultElement.textContent = resultText;
             };
 
+            // send req based on type
             const sendRequest = async (form) => {
                 const methodSelect = form.querySelector("#methodSelect");
                 const method = methodSelect ? methodSelect.value.toUpperCase() : form.getAttribute("data-method").toUpperCase();
@@ -41,6 +43,7 @@
                     headers: { "Accept": "application/json" },
                 };
 
+                // looks at method type 
                 if (method === "GET" || method === "HEAD") {
                     const params = new URLSearchParams(new FormData(form)).toString();
                     if (params) url += `?${params}`;
@@ -65,21 +68,13 @@
             };
 
 
-            // Attach event listeners to all forms
+            // attach event listeners to all forms
             document.querySelectorAll("form").forEach((form) => {
                 form.addEventListener("submit", (event) => {
                     event.preventDefault();
                     sendRequest(form);
                 });
             });
-
-            /*document.querySelectorAll(".collapsible").forEach((button) => {
-                button.addEventListener("click", () => {
-                    const content = button.nextElementSibling;
-                    content.style.display = content.style.display === "block" ? "none" : "block";
-                });
-            });*/
-
         });
     </script>
 
@@ -88,12 +83,11 @@
 <body>
     <div class="mainContent">
         <a href="https://www.kaggle.com/datasets/jashanjeetsinghhh/songs-dataset">Dataset Link</a>
-        <h1>Music API</h1>
+        <h1>Music Track API</h1>
 
-        <h2>THIS SCREEN IS NOT FUNCTIONAL YET, GO TO ENDPOINTS DIRECTLY TO TEST RESULTS.</h2>
-
+        <!-- API endpoints -->
         <div class="endpoint">
-            <h2 class="collapsible">/getAllTracks <span class="methods"><code>GET</code></span></h2>
+            <h2 class="collapsible">/getAllTracks <span class="methods"><code>GET</code> <code>HEAD</code></span></h2>
             <div class="content">
                 <div class="content-box">
                     <h3>Test This Endpoint</h3>
@@ -110,12 +104,12 @@
         </div>
 
         <div class="endpoint">
-            <h2 class="collapsible">/getTracks <span class="methods"><code>GET</code></span></h2>
+            <h2 class="collapsible">/getTracks <span class="methods"><code>GET</code> <code>HEAD</code></span></h2>
             <div class="content">
                 <div class="content-box">
                     <h3>Test This Endpoint</h3>
                     <form data-method="GET" data-endpoint="/getTracks">
-                        <label>Title Name: <input type="text" name="name"></label><br>
+                        <label>Title: <input type="text" name="name"></label><br>
                         <label>Artist: <input type="text" name="artist"></label><br>
                         <label>Min Danceability: <input type="text" name="danceMin"></label><br>
                         <select id="methodSelect">
@@ -130,7 +124,7 @@
         </div>
 
         <div class="endpoint">
-            <h2 class="collapsible">/getAllArtists <span class="methods"><code>GET</code></span></h2>
+            <h2 class="collapsible">/getAllArtists <span class="methods"><code>GET</code> <code>HEAD</code></span></h2>
             <div class="content">
                 <div class="content-box">
                     <h3>Test This Endpoint</h3>
@@ -147,12 +141,12 @@
         </div>
 
         <div class="endpoint">
-            <h2 class="collapsible">/getArtists <span class="methods"><code>GET</code></span></h2>
+            <h2 class="collapsible">/getArtists <span class="methods"><code>GET</code> <code>HEAD</code></span></h2>
             <div class="content">
                 <div class="content-box">
                     <h3>Test This Endpoint</h3>
                     <form data-method="GET" data-endpoint="/getArtists">
-                        <label>Artist Name: <input type="text" name="name"></label><br>
+                        <label>Name: <input type="text" name="name"></label><br>
                         <label>Min Danceability: <input type="text" name="danceMin"></label><br>
                         <label>Min Song Count: <input type="text" name="songCountMin"></label><br>
                         <select id="methodSelect">
@@ -167,7 +161,7 @@
         </div>
 
         <div class="endpoint">
-            <h2 class="collapsible">/getFavorites <span class="methods"><code>GET</code></span></h2>
+            <h2 class="collapsible">/getFavorites <span class="methods"><code>GET</code> <code>HEAD</code></span></h2>
             <div class="content">
                 <div class="content-box">
                     <h3>Test This Endpoint</h3>

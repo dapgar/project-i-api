@@ -1,3 +1,5 @@
+// converts dataset from CSV to JSON. Did get help on this implementation online to use the dataset. 
+
 const csv = require('csvtojson');
 const fs = require('fs');
 

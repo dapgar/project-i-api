@@ -15,7 +15,7 @@ body {
 a {
     text-decoration: none;
     font-weight: bold;
-    color: #007bff;
+    color: #28a745;
 }
 
 a:hover {
@@ -36,7 +36,7 @@ footer {
 
 .methods code {
     background-color: #e7e7e7;
-    color: #007bff;
+    color: #28a745;
     padding: 3px 7px;
     border-radius: 3px;
     font-weight: bold;
@@ -58,7 +58,7 @@ form {
 
 input {
     margin: 5px 0;
-    padding: 8px;
+    padding: px;
     border: 1px solid #ccc;
     border-radius: 4px;
 }
@@ -66,6 +66,8 @@ input {
 button {
     background-color: #28a745;
     color: white;
+    margin-left: 15px;
+    margin-top: 15px;
     padding: 8px 12px;
     border: none;
     border-radius: 4px;
@@ -96,6 +98,7 @@ code {
     padding: 2px 5px;
 }
 
+/* Had help containing results in scrollable box from stackoverflow*/
 .result {
     max-height: 300px;  /* Limits height */
     overflow-y: auto;   /* Enables scrolling */
