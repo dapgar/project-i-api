@@ -9,20 +9,29 @@
         document.addEventListener("DOMContentLoaded", () => {
             // Function to handle responses
             const handleResponse = async (response, resultElement) => {
-                let resultText;
-                try {
-                    const data = await response.json();
-                    resultText = JSON.stringify(data, null, 2);
-                } catch (error) {
-                    resultText = "Error parsing response.";
+                let resultText = `Status: ${response.status}\n`;
+
+                if (response.method !== "HEAD") {
+                    try {
+                        const data = await response.json();
+                        resultText += JSON.stringify(data, null, 2);
+                    } catch (error) {
+                        resultText += "No body content (possible HEAD request).";
+                    }
+                }
+                else {
+                    resultText += "\nHeaders:\n";
+                    response.headers.forEach((value, name) => {
+                        resultText += `${name}: ${value}\n`;
+                    });
                 }
 
-                resultElement.textContent = `Status: ${response.status}\n${resultText}`;
+                resultElement.textContent = resultText;
             };
 
-            // Function to send requests based on form data
             const sendRequest = async (form) => {
-                const method = form.getAttribute("data-method").toUpperCase();
+                const methodSelect = form.querySelector("#methodSelect");
+                const method = methodSelect ? methodSelect.value.toUpperCase() : form.getAttribute("data-method").toUpperCase();
                 const endpoint = form.getAttribute("data-endpoint");
                 const resultElement = form.nextElementSibling;
 
@@ -32,12 +41,9 @@
                     headers: { "Accept": "application/json" },
                 };
 
-                if (method === "GET") {
-                    // Convert form data to URL parameters
+                if (method === "GET" || method === "HEAD") {
                     const params = new URLSearchParams(new FormData(form)).toString();
                     if (params) url += `?${params}`;
-
-                    console.log(`GET Request URL: ${url}`); // Debugging line
                 } else if (method === "POST") {
                     const formData = Object.fromEntries(new FormData(form));
                     options.headers["Content-Type"] = "application/json";
@@ -45,12 +51,19 @@
                 }
 
                 try {
+                    console.log(`Sending ${method} request to: ${url}`);
                     const response = await fetch(url, options);
-                    handleResponse(response, resultElement);
+
+                    if (method === "HEAD") {
+                        resultElement.textContent = `Status: ${response.status}\nHeaders: ${[...response.headers].map(h => h.join(": ")).join("\n")}`;
+                    } else {
+                        handleResponse(response, resultElement);
+                    }
                 } catch (error) {
                     resultElement.textContent = `Request failed: ${error.message}`;
                 }
             };
+
 
             // Attach event listeners to all forms
             document.querySelectorAll("form").forEach((form) => {
@@ -85,6 +98,10 @@
                 <div class="content-box">
                     <h3>Test This Endpoint</h3>
                     <form data-method="GET" data-endpoint="/getAllTracks">
+                        <select id="methodSelect">
+                            <option value="get">GET</option>
+                            <option value="head">HEAD</option>
+                        </select>
                         <button type="submit">Send Request</button>
                     </form>
                     <pre class="result"></pre>
@@ -101,6 +118,10 @@
                         <label>Title Name: <input type="text" name="name"></label><br>
                         <label>Artist: <input type="text" name="artist"></label><br>
                         <label>Min Danceability: <input type="text" name="danceMin"></label><br>
+                        <select id="methodSelect">
+                            <option value="get">GET</option>
+                            <option value="head">HEAD</option>
+                        </select>
                         <button type="submit">Send Request</button>
                     </form>
                     <pre class="result"></pre>
@@ -114,6 +135,10 @@
                 <div class="content-box">
                     <h3>Test This Endpoint</h3>
                     <form data-method="GET" data-endpoint="/getAllArtists">
+                        <select id="methodSelect">
+                            <option value="get">GET</option>
+                            <option value="head">HEAD</option>
+                        </select>
                         <button type="submit">Send Request</button>
                     </form>
                     <pre class="result"></pre>
@@ -130,6 +155,10 @@
                         <label>Artist Name: <input type="text" name="name"></label><br>
                         <label>Min Danceability: <input type="text" name="danceMin"></label><br>
                         <label>Min Song Count: <input type="text" name="songCountMin"></label><br>
+                        <select id="methodSelect">
+                            <option value="get">GET</option>
+                            <option value="head">HEAD</option>
+                        </select>
                         <button type="submit">Send Request</button>
                     </form>
                     <pre class="result"></pre>
@@ -143,6 +172,10 @@
                 <div class="content-box">
                     <h3>Test This Endpoint</h3>
                     <form data-method="GET" data-endpoint="/getFavorites">
+                        <select id="methodSelect">
+                            <option value="get">GET</option>
+                            <option value="head">HEAD</option>
+                        </select>
                         <button type="submit">Send Request</button>
                     </form>
                     <pre class="result"></pre>

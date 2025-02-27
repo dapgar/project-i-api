@@ -9,7 +9,7 @@ const parseBody = (request, response, handler) => {
     const body = [];
 
     request.on('error', (err) => {
-        console.error(err);
+        console.dir(err);
         response.statusCode = 400;
         response.end();
     });
@@ -82,17 +82,43 @@ const handleGet = (request, response, parsedUrl) => {
     }
 };
 
+const handleHead = (request, response, parsedUrl) => {
+    console.log(`Received HEAD request for: ${parsedUrl.pathname}`);
+
+    response.writeHead(200, { 'Content-Type': 'application/json' });
+
+    if (parsedUrl.pathname === '/getAllTracks') {
+        // Instead of sending JSON, just end the response after setting headers
+        response.end();
+    }
+    else if (parsedUrl.pathname === '/getTracks') {
+        response.end();
+    }
+    else if (parsedUrl.pathname === '/getAllArtists') {
+        response.end();
+    }
+    else if (parsedUrl.pathname === '/getArtists') {
+        response.end();
+    }
+    else if (parsedUrl.pathname === '/getFavorites') {
+        response.end();
+    }
+    else {
+        response.writeHead(404, { 'Content-Type': 'application/json' });
+        response.end();
+    }
+};
+
 const onRequest = (request, response) => {
     const protocol = request.connection.encrypted ? 'https' : 'http';
     const parsedUrl = new URL(request.url, `${protocol}://${request.headers.host}`);
 
     if (request.method === 'POST') {
         handlePost(request, response, parsedUrl);
-    } else if (request.method === 'GET') {
-        handleGet(request, response, parsedUrl);
+    } else if (request.method === 'HEAD') {
+        handleHead(request, response, parsedUrl);
     } else {
-        response.writeHead(405, { 'Content-Type': 'application/json' });
-        response.end(JSON.stringify({ message: 'Method not allowed' }));
+        handleGet(request, response, parsedUrl);
     }
 };
 
