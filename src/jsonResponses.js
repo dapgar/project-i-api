@@ -18,6 +18,8 @@ const getAllTracks = (request, response) => {
 
 // get all tracks w filtering
 const getTracks = (request, response, queryParams) => {
+    console.log("Received query params:", queryParams); // Debugging line
+
     let filteredTracks = musicData;
 
     if (queryParams.name) {
@@ -34,8 +36,8 @@ const getTracks = (request, response, queryParams) => {
         );
     }
 
-    if (queryParams.danceability_min) {
-        const minDanceability = parseFloat(queryParams.danceability_min);
+    if (queryParams.danceMin) {
+        const minDanceability = parseFloat(queryParams.danceMin);
         if (!isNaN(minDanceability)) {
             filteredTracks = filteredTracks.filter(track =>
                 parseFloat(track.danceability) >= minDanceability
@@ -46,7 +48,7 @@ const getTracks = (request, response, queryParams) => {
     const simplifiedTracks = filteredTracks.map(track => ({
         name: track.name,
         artist: track.artist,
-        danceability: parseFloat(track.danceability),
+        danceability: parseFloat(track.danceability).toFixed(2),
     }));
 
     respondJSON(request, response, 200, { tracks: simplifiedTracks });
@@ -60,6 +62,8 @@ const getAllArtists = (request, response) => {
 
 // get artists w filtering
 const getArtists = (request, response, queryParams) => {
+    console.log("Received query params:", queryParams); // Debugging line
+
     const artistData = {};
 
     musicData.forEach(track => {
@@ -74,10 +78,11 @@ const getArtists = (request, response, queryParams) => {
         artistData[artist].totalDanceability += danceability;
     });
 
+    // needed some help on only displaying certain values, referenced stackoverflow/ chatgpt for help here
     let artistsArray = Object.keys(artistData).map(artist => ({
         name: artist,
         songCount: artistData[artist].songCount,
-        avgDanceability: artistData[artist].totalDanceability / artistData[artist].songCount,
+        avgDanceability: (artistData[artist].totalDanceability / artistData[artist].songCount).toFixed(2),
     }));
 
     if (queryParams.name) {
@@ -104,6 +109,8 @@ const getArtists = (request, response, queryParams) => {
 
 // add a new track
 const addTrack = (request, response) => {
+    console.log("Received Body:", request.body);
+
     let responseJSON = {
         message: 'Name, artist, and danceability are required.',
     };
@@ -161,6 +168,7 @@ if (!musicData.favorites) {
 
 // get all favorites
 const getFavorites = (request, response) => {
+    console.log("Favorites Data:", musicData.favorites); // Debugging
     respondJSON(request, response, 200, { favorites: musicData.favorites });
 };
 

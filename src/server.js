@@ -20,11 +20,17 @@ const parseBody = (request, response, handler) => {
 
     request.on('end', () => {
         const bodyString = Buffer.concat(body).toString();
-        request.body = query.parse(bodyString);
+
+        try {
+            request.body = JSON.parse(bodyString); // Parse JSON correctly
+        } catch (err) {
+            console.error("JSON parsing error:", err);
+            request.body = {}; // Set to empty object on failure
+        }
 
         handler(request, response);
     });
-};
+}
 
 // handle POST requests
 const handlePost = (request, response, parsedUrl) => {
@@ -43,7 +49,7 @@ const handlePost = (request, response, parsedUrl) => {
     }
 };
 
-
+// handle GET requests
 const handleGet = (request, response, parsedUrl) => {
     console.log(`Received GET request for: ${parsedUrl.pathname}`);
 
@@ -69,12 +75,6 @@ const handleGet = (request, response, parsedUrl) => {
     }
     else if (parsedUrl.pathname === '/getFavorites') {
         jsonHandler.getFavorites(request, response); // getFavorites
-    }
-    else if (parsedUrl.pathname === '/addFavorite') {
-        jsonHandler.addFavorite(request, response,); // addFavorite
-    }
-    else if (parsedUrl.pathname === '/addTrack') {
-        jsonHandler.addTrack(request, response); // addTrack
     }
     else {
         response.writeHead(404, { 'Content-Type': 'application/json' });

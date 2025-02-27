@@ -3,8 +3,73 @@
 
 <head>
     <title>Music Track API</title>
-    <link rel="stylesheet" type="text/css" href="/style.css">
-    <script src="/client.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="style.css">
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            // Function to handle responses
+            const handleResponse = async (response, resultElement) => {
+                let resultText;
+                try {
+                    const data = await response.json();
+                    resultText = JSON.stringify(data, null, 2);
+                } catch (error) {
+                    resultText = "Error parsing response.";
+                }
+
+                resultElement.textContent = `Status: ${response.status}\n${resultText}`;
+            };
+
+            // Function to send requests based on form data
+            const sendRequest = async (form) => {
+                const method = form.getAttribute("data-method").toUpperCase();
+                const endpoint = form.getAttribute("data-endpoint");
+                const resultElement = form.nextElementSibling;
+
+                let url = endpoint;
+                let options = {
+                    method: method,
+                    headers: { "Accept": "application/json" },
+                };
+
+                if (method === "GET") {
+                    // Convert form data to URL parameters
+                    const params = new URLSearchParams(new FormData(form)).toString();
+                    if (params) url += `?${params}`;
+
+                    console.log(`GET Request URL: ${url}`); // Debugging line
+                } else if (method === "POST") {
+                    const formData = Object.fromEntries(new FormData(form));
+                    options.headers["Content-Type"] = "application/json";
+                    options.body = JSON.stringify(formData);
+                }
+
+                try {
+                    const response = await fetch(url, options);
+                    handleResponse(response, resultElement);
+                } catch (error) {
+                    resultElement.textContent = `Request failed: ${error.message}`;
+                }
+            };
+
+            // Attach event listeners to all forms
+            document.querySelectorAll("form").forEach((form) => {
+                form.addEventListener("submit", (event) => {
+                    event.preventDefault();
+                    sendRequest(form);
+                });
+            });
+
+            /*document.querySelectorAll(".collapsible").forEach((button) => {
+                button.addEventListener("click", () => {
+                    const content = button.nextElementSibling;
+                    content.style.display = content.style.display === "block" ? "none" : "block";
+                });
+            });*/
+
+        });
+    </script>
+
 </head>
 
 <body>
@@ -33,9 +98,9 @@
                 <div class="content-box">
                     <h3>Test This Endpoint</h3>
                     <form data-method="GET" data-endpoint="/getTracks">
-                        <label>Title: <input type="text" name="title"></label><br>
+                        <label>Title Name: <input type="text" name="name"></label><br>
                         <label>Artist: <input type="text" name="artist"></label><br>
-                        <label>Danceability: <input type="text" name="danceability"></label><br>
+                        <label>Min Danceability: <input type="text" name="danceMin"></label><br>
                         <button type="submit">Send Request</button>
                     </form>
                     <pre class="result"></pre>
@@ -62,9 +127,9 @@
                 <div class="content-box">
                     <h3>Test This Endpoint</h3>
                     <form data-method="GET" data-endpoint="/getArtists">
-                        <label>Title: <input type="text" name="title"></label><br>
-                        <label>Artist: <input type="text" name="artist"></label><br>
-                        <label>Danceability: <input type="text" name="danceability"></label><br>
+                        <label>Artist Name: <input type="text" name="name"></label><br>
+                        <label>Min Danceability: <input type="text" name="danceMin"></label><br>
+                        <label>Min Song Count: <input type="text" name="songCountMin"></label><br>
                         <button type="submit">Send Request</button>
                     </form>
                     <pre class="result"></pre>
@@ -77,7 +142,7 @@
             <div class="content">
                 <div class="content-box">
                     <h3>Test This Endpoint</h3>
-                    <form data-method="POST" data-endpoint="/getFavorites">
+                    <form data-method="GET" data-endpoint="/getFavorites">
                         <button type="submit">Send Request</button>
                     </form>
                     <pre class="result"></pre>
@@ -91,7 +156,7 @@
                 <div class="content-box">
                     <h3>Test This Endpoint</h3>
                     <form data-method="POST" data-endpoint="/addFavorite">
-                        <label>Title: <input type="text" name="title"></label><br>
+                        <label>Title: <input type="text" name="name"></label><br>
                         <button type="submit">Send Request</button>
                     </form>
                     <pre class="result"></pre>
@@ -105,7 +170,7 @@
                 <div class="content-box">
                     <h3>Test This Endpoint</h3>
                     <form data-method="POST" data-endpoint="/addTrack">
-                        <label>Title: <input type="text" name="title"></label><br>
+                        <label>Title: <input type="text" name="name"></label><br>
                         <label>Artist: <input type="text" name="artist"></label><br>
                         <label>Danceability: <input type="text" name="danceability"></label><br>
                         <button type="submit">Send Request</button>
